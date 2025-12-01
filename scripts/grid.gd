@@ -11,9 +11,12 @@ const hex_v_blank_pixels = 60
 var grid: Array[Array] = []
 var selectedTile: Tile
 var camera: Camera3D
+var game: Game
 
 func _ready() -> void:
-
+	self.game = self.get_parent().game
+	game.player_changed.connect(_on_player_changed)
+	
 	camera = get_viewport().get_camera_3d()
 	if not camera:
 		camera = Camera3D.new()
@@ -66,9 +69,15 @@ func on_tile_clicked(tile: Tile) -> void:
 	# Select new tilewd
 	selectedTile = tile
 	tile.t_selected = true
-	tile.modulate = Color(0.4, 0.6, 0.8)  # Highlight in light blue
+	tile.modulate = self.game.current_player.colour
 	
 	print("Clicked tile: ", tile)
+
+func _on_player_changed(_player: Player):
+	if selectedTile:
+		selectedTile.t_selected = false
+		selectedTile.modulate = Color(1, 1, 1)  # Reset color
+		selectedTile = null
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
